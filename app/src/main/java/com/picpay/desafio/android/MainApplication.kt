@@ -1,6 +1,7 @@
 package com.picpay.desafio.android
 
 import android.app.Application
+import com.picpay.desafio.android.di.databaseModule
 import com.picpay.desafio.android.di.userViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -13,7 +14,7 @@ class MainApplication : Application() {
             androidLogger()
             androidContext(this@MainApplication)
 
-            modules(userViewModel)
+            modules(listOf(userViewModel, databaseModule))
         }
     }
 

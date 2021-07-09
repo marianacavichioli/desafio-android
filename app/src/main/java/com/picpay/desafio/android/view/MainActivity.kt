@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var adapter: UserListAdapter
-    private val viewModel: MainActivityViewModel by viewModel()
+    private val viewModel: UserViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +48,26 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         adapter = UserListAdapter()
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
+    }
+
+    private fun getData() {
+        viewModel.users.observe(this, Observer<List<User>>{ users ->
+            hideProgressBar()
+            if (users.isNotEmpty() && users != null) {
+                adapter.users = users
+                adapter.notifyDataSetChanged()
+            }
+        })
+
+        viewModel.error.observe(this, Observer { error ->
+            if (error) {
+                val message = getString(R.string.error)
+                hideProgressBar()
+                hideRecyclerView()
+                Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT)
+                    .show()
+            }
+        })
     }
 
     private fun showProgressBar() {
