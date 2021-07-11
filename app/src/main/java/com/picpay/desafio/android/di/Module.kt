@@ -2,14 +2,15 @@ package com.picpay.desafio.android.di
 
 import android.app.Application
 import androidx.room.Room
-import com.picpay.desafio.android.data.UserDao
 import com.picpay.desafio.android.data.UserDatabase
 import com.picpay.desafio.android.repository.UserRepository
 import com.picpay.desafio.android.view.UserViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
+@ExperimentalCoroutinesApi
 val userViewModel = module {
     factory { UserRepository(get()) }
     viewModel {
@@ -25,10 +26,5 @@ val databaseModule = module {
             .build()
     }
 
-    fun provideUsersDao(database: UserDatabase): UserDao {
-        return database.userDao()
-    }
-
     single { provideDatabase(androidApplication()) }
-    single { provideUsersDao(get()) }
 }

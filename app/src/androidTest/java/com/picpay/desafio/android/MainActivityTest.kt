@@ -4,17 +4,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.platform.app.InstrumentationRegistry
 import com.picpay.desafio.android.view.MainActivity
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
+import org.hamcrest.Matchers.allOf
 import org.junit.Test
 
-
+@ExperimentalCoroutinesApi
 class MainActivityTest {
 
     private val server = MockWebServer()
@@ -46,7 +47,13 @@ class MainActivityTest {
         server.start(serverPort)
 
         launchActivity<MainActivity>().apply {
-            // TODO("validate if list displays items returned by server")
+            Thread.sleep(5000)
+            RecyclerViewMatchers.checkRecyclerViewItem(R.id.recyclerView, 0, isDisplayed())
+            RecyclerViewMatchers.checkRecyclerViewItem(
+                R.id.recyclerView,
+                0,
+                allOf(withId(R.id.username), withText("Tod86"))
+            )
         }
 
         server.close()

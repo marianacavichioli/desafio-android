@@ -1,20 +1,28 @@
 package com.picpay.desafio.android.repository
 
-import androidx.lifecycle.LiveData
-import com.picpay.desafio.android.data.User
-import com.picpay.desafio.android.data.UserDao
+import androidx.room.withTransaction
+import com.picpay.desafio.android.data.UserDatabase
 import com.picpay.desafio.android.network.RetrofitService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.picpay.desafio.android.utils.networkBoundResource
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import retrofit2.await
 
-class UserRepository(private val userDao: UserDao) {
-    val users: LiveData<List<User>> = userDao.getAllUsers()
+open class UserRepository(private val userDatabase: UserDatabase) {
+    private val userDao = userDatabase.userDao()
 
-    suspend fun getUsers() {
-        withContext(Dispatchers.IO) {
-            val users = RetrofitService.getService().getUsers().await()
-            userDao.insertUsers(users)
+    @ExperimentalCoroutinesApi
+    open fun getUsers() = networkBoundResource(
+        query = {
+            userDao.getAllUsers()
+        },
+        fetch = {
+            RetrofitService.getService().getUsers()
+        },
+        saveFetchResult = { call ->
+            userDatabase.withTransaction {
+                userDao.deleteUsers()
+                userDao.insertUsers(call.await())
+            }
         }
-    }
+    )
 }

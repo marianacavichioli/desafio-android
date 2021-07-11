@@ -9,10 +9,12 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.picpay.desafio.android.R
-import com.picpay.desafio.android.adapter.UserListAdapter
 import com.picpay.desafio.android.data.User
+import com.picpay.desafio.android.utils.Resource
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
+@ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private lateinit var recyclerView: RecyclerView
@@ -51,21 +53,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     private fun getData() {
-        viewModel.users.observe(this, Observer<List<User>>{ users ->
-            hideProgressBar()
-            if (users.isNotEmpty() && users != null) {
-                adapter.users = users
-                adapter.notifyDataSetChanged()
+        viewModel.users.observe(this, Observer { result ->
+            when (result) {
+                is Resource.Success -> result.data?.let { showList(it) }
+                is Resource.Loading -> showProgressBar()
+                else -> showError()
             }
-        })
-
-        viewModel.error.observe(this, Observer { error ->
-            if (error) {
-                val message = getString(R.string.error)
+            if (result is Resource.Loading) {
+                showProgressBar()
+            } else {
                 hideProgressBar()
-                hideRecyclerView()
-                Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT)
-                    .show()
             }
         })
     }
@@ -80,5 +77,19 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private fun hideRecyclerView() {
         recyclerView.visibility = View.GONE
+    }
+
+    private fun showList(users: List<User>) {
+        hideProgressBar()
+        adapter.users = users
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun showError() {
+        hideProgressBar()
+        hideRecyclerView()
+        val message = getString(R.string.error)
+        Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT)
+            .show()
     }
 }
