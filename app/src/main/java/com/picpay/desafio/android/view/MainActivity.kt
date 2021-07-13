@@ -6,6 +6,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.picpay.desafio.android.R
@@ -32,18 +33,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         initRecyclerView()
         showProgressBar()
 
-        viewModel.users.observe(this, Observer<List<User>>{ users ->
-            hideProgressBar()
-            if (users != null) {
-                adapter.users = users
-                adapter.notifyDataSetChanged()
-            } else {
-                val message = getString(R.string.error)
-                hideRecyclerView()
-                Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT)
-                    .show()
-            }
-        })
+        getData()
     }
 
     private fun initRecyclerView() {
